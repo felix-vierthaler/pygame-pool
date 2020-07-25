@@ -36,14 +36,15 @@ class App:
 
         while self.running:
             #test if window was closed
-            for event in pygame.event.get():
+            events = pygame.event.get()
+            for event in events:
                 if event.type == pygame.QUIT:
                     self.running = False
                     #break
 
             #handle events, update and render active Scene
             self.activeScene.render(self.screen)
-            self.activeScene.handleEvent()
+            self.activeScene.handleEvent(events)
             self.activeScene.update()
             
 

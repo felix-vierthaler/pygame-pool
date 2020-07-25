@@ -15,20 +15,27 @@ class Balls:
 
     class Ball:
         MASS = 1
-        RESISTANCE = 0.01
+        RESISTANCE = 0.03
         MIN_SPEED = 0.04
 
 
-        def __init__(self, x, y, xV, yV, name, radius):
+        def __init__(self, x, y, xV, yV, id, radius):
             self.RADIUS = radius
+
+            self.selected = False
 
             self.pos = np.array([x, y])
             self.vel = np.array([xV, yV])
-            self.name = name
+            self.id = id
+
+            self.color = (50, 100, 200)
+            if id == 0:
+                self.color = (245, 245, 245)
 
             self.font = pygame.font.SysFont("comicsansms", 15)
 
-            self.collided = False
+            self.inCollision = False
+            self.collisionBuddy = 0
 
         def update(self):
             #calculate new velocity with resistance
@@ -45,11 +52,15 @@ class Balls:
 
         def render(self, screen):
             #render circle
-            pygame.draw.circle(screen, (255, 155, 11), (int(self.pos[0]), int(self.pos[1])), self.RADIUS)
+            pygame.draw.circle(screen, self.color, (int(self.pos[0]), int(self.pos[1])), self.RADIUS)
+            if self.selected:
+                pygame.draw.circle(screen, (240,250,60), (int(self.pos[0]), int(self.pos[1])), self.RADIUS)
+
+            if self.inCollision:
+                pygame.draw.circle(screen, (240,0,0), (int(self.pos[0]), int(self.pos[1])), self.RADIUS//2)
             #render text on ball
-            text = self.font.render(str(self.name), True, (0, 128, 0))
+            text = self.font.render(str(self.id), True, (0, 0, 0))
             screen.blit(text, (int(self.pos[0]) - text.get_width() / 2, int(self.pos[1]) - text.get_height() / 2))
-            
         
         def collideWith(self, other):
             #information on: https://vobarian.com/collisions/2dcollisions2.pdf
@@ -60,8 +71,12 @@ class Balls:
             dist = np.linalg.norm(n)
 
             #if both balls collided
-            if dist <= self.RADIUS + other.RADIUS:
-                self.collided = True
+            if dist <= self.RADIUS + other.RADIUS and not self.inCollision and not other.inCollision:
+                self.inCollision = True
+                self.collisionBuddy = other
+                other.inCollision = True
+                other.collisionBuddy = self
+
                 
                 #find unit normal vector
                 un = n * (1 / dist)
@@ -118,10 +133,16 @@ class Balls:
                 print('v1: ', v1)
                 print('v2: ', v2)
                 """
+            else:
+                if self.inCollision and other.inCollision and self.collisionBuddy == other and other.collisionBuddy == self:
+                    self.inCollision = False
+                    other.inCollision = False
+                
 
     def start(self):
+        self.balls.append(self.Ball(600, 600, uniform(5, 10), uniform(5, 10), 0, self.RADIUS))
         self.createTriangle(100,100)
-        self.balls.append(self.Ball(600, 600, uniform(5, 10), uniform(5, 10), "8", self.RADIUS))
+        
 
     #creates the triangle of balls needed to start a game of 8 ball pool
     def createTriangle(self, xStart, yStart):
@@ -140,8 +161,14 @@ class Balls:
                 self.balls.append(self.Ball(xPos, yPos, 0, 0, count, self.RADIUS))
 
 
+    def mouseDown(self):
+        self.balls[0].selected = True
 
+    def mouseUp(self):
+        self.balls[0].selected = False
 
+    def shoot(self, aim):
+        self.balls[0].vel = aim
 
     def update(self):
         #check if out of bounds
