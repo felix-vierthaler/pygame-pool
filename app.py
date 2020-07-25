@@ -42,9 +42,10 @@ class App:
                     #break
 
             #handle events, update and render active Scene
+            self.activeScene.render(self.screen)
             self.activeScene.handleEvent()
             self.activeScene.update()
-            self.activeScene.render(self.screen)
+            
 
             #flip pygame buffer to actually render to screen
             pygame.display.flip()

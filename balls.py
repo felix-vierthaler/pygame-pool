@@ -13,6 +13,9 @@ class Balls:
     class Ball:
         RADIUS = 25
         MASS = 1
+        RESISTANCE = 0.01
+        MIN_SPEED = 0.04
+
 
         def __init__(self, x, y, xV, yV, name):
             self.pos = np.array([x, y])
@@ -24,14 +27,26 @@ class Balls:
             self.collided = False
 
         def update(self):
-            #update position
-            self.pos = self.pos + self.vel
+            #calculate new velocity
+            velLen = np.linalg.norm(self.vel)
+            if velLen != 0:
+                newVelLen = 0
+                if velLen > self.RESISTANCE:
+                    newVelLen = velLen - self.RESISTANCE
+                elif velLen < -self.RESISTANCE:
+                    newVelLen = velLen + self.RESISTANCE
+
+                self.vel = (newVelLen / velLen) * self.vel
+
+            if np.linalg.norm(self.vel) > self.MIN_SPEED:
+                self.pos = self.pos + self.vel
 
         def render(self, screen):
+            #render circle
             pygame.draw.circle(screen, (255, 155, 11), (int(self.pos[0]), int(self.pos[1])), self.RADIUS)
             #render text on ball
             text = self.font.render(str(self.name), True, (0, 128, 0))
-            screen.blit(text, (self.pos[0] - text.get_width() / 2, self.pos[1] - text.get_height() / 2))
+            screen.blit(text, (int(self.pos[0]) - text.get_width() / 2, int(self.pos[1]) - text.get_height() / 2))
             
 
 
@@ -107,7 +122,7 @@ class Balls:
     def start(self):
 
         for i in range(20):
-            self.balls.append(self.Ball(randint(0, self.width), randint(0, self.height), uniform(0, 3), uniform(0, 3), i))
+            self.balls.append(self.Ball(randint(0, self.width), randint(0, self.height), uniform(0, 10), uniform(0, 10), i))
 
 
     def update(self):
