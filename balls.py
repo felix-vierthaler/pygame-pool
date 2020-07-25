@@ -6,7 +6,7 @@ import numpy as np
 
 class Balls:
     RADIUS = 25
-    TRIANGLE_SPACING = 4
+    TRIANGLE_SPACING = 5
 
     def __init__(self, width, height):
         self.balls = []
@@ -15,7 +15,7 @@ class Balls:
 
     class Ball:
         MASS = 1
-        RESISTANCE = 0.03
+        RESISTANCE = 0.04
         MIN_SPEED = 0.04
 
 
@@ -33,9 +33,6 @@ class Balls:
                 self.color = (245, 245, 245)
 
             self.font = pygame.font.SysFont("comicsansms", 15)
-
-            self.inCollision = False
-            self.collisionBuddy = 0
 
         def update(self):
             #calculate new velocity with resistance
@@ -56,8 +53,6 @@ class Balls:
             if self.selected:
                 pygame.draw.circle(screen, (240,250,60), (int(self.pos[0]), int(self.pos[1])), self.RADIUS)
 
-            if self.inCollision:
-                pygame.draw.circle(screen, (240,0,0), (int(self.pos[0]), int(self.pos[1])), self.RADIUS//2)
             #render text on ball
             text = self.font.render(str(self.id), True, (0, 0, 0))
             screen.blit(text, (int(self.pos[0]) - text.get_width() / 2, int(self.pos[1]) - text.get_height() / 2))
@@ -71,12 +66,7 @@ class Balls:
             dist = np.linalg.norm(n)
 
             #if both balls collided
-            if dist <= self.RADIUS + other.RADIUS and not self.inCollision and not other.inCollision:
-                self.inCollision = True
-                self.collisionBuddy = other
-                other.inCollision = True
-                other.collisionBuddy = self
-
+            if dist <= self.RADIUS + other.RADIUS:
                 
                 #find unit normal vector
                 un = n * (1 / dist)
@@ -133,10 +123,12 @@ class Balls:
                 print('v1: ', v1)
                 print('v2: ', v2)
                 """
-            else:
-                if self.inCollision and other.inCollision and self.collisionBuddy == other and other.collisionBuddy == self:
-                    self.inCollision = False
-                    other.inCollision = False
+                #move balls apart from each other so they don't collide again
+                moveDist = (self.RADIUS + other.RADIUS - dist) / 2
+                moveVector = moveDist * un
+
+                self.pos += -moveVector
+                other.pos += moveVector
                 
 
     def start(self):
@@ -146,7 +138,7 @@ class Balls:
 
     #creates the triangle of balls needed to start a game of 8 ball pool
     def createTriangle(self, xStart, yStart):
-        distance = (self.RADIUS * 2) + 4
+        distance = (self.RADIUS * 2) + self.TRIANGLE_SPACING
         height = (distance * 4)
         hDistance = height / 5
 
@@ -173,11 +165,19 @@ class Balls:
     def update(self):
         #check if out of bounds
         for ball in self.balls:
-            if ball.pos[0] <= 0 + ball.RADIUS or ball.pos[0] > self.width - ball.RADIUS:
+            if ball.pos[0] <= ball.RADIUS:
                 ball.vel[0] = ball.vel[0] * -1
+                ball.pos[0] = ball.RADIUS
+            elif ball.pos[0] > self.width - ball.RADIUS:
+                ball.vel[0] = ball.vel[0] * -1
+                ball.pos[0] = self.width - ball.RADIUS
 
-            if ball.pos[1] <= 0 + ball.RADIUS or ball.pos[1] > self.height - ball.RADIUS:
+            if ball.pos[1] <= ball.RADIUS:
                 ball.vel[1] = ball.vel[1] * -1
+                ball.pos[1] = ball.RADIUS
+            elif ball.pos[1] > self.height - ball.RADIUS:
+                ball.vel[1] = ball.vel[1] * -1
+                ball.pos[1] = self.height - ball.RADIUS
         
         #check for collisions
         for x in range(0, len(self.balls) - 1):
