@@ -18,7 +18,6 @@ class Balls:
         RESISTANCE = 0.04
         MIN_SPEED = 0.04
 
-
         def __init__(self, x, y, xV, yV, id, radius):
             self.RADIUS = radius
 
