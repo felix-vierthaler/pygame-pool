@@ -63,8 +63,6 @@ class GameScene(SceneBase):
         #update all blobs
         self.balls.update()
 
-        
-
     def render(self, screen):
         screen.fill((0, 0, 0))
 
