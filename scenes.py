@@ -6,6 +6,7 @@ import numpy as np
 #own imports
 from balls import Balls
 from pole import Pole
+from table import Table
 
 #base class for all scenes
 class SceneBase:
@@ -32,8 +33,8 @@ class GameScene(SceneBase):
     def __init__(self, app, width, height):
         SceneBase.__init__(self, app, width, height)
 
-        self.balls = Balls(self.width, self.height)
-        self.pole = Pole(self.width, self.height, self.balls)
+        tableWidth = self.width - 40
+        self.table = Table(tableWidth, (self.width - tableWidth) // 2, 50)
         
         self.aimStart = 0
         self.aimEnd = 0
@@ -42,35 +43,30 @@ class GameScene(SceneBase):
     def start(self):
         self.isActive = True
 
-        self.balls.start()
-
     def handleEvent(self, events):
         # proceed events
         for event in events:
             if event.type == pygame.MOUSEBUTTONDOWN:
                 x, y = pygame.mouse.get_pos()
                 aimStart = np.array([x, y])
-                self.pole.aim(aimStart)
+                self.table.pole.aim(aimStart)
                 
             if event.type == pygame.MOUSEBUTTONUP:
-                self.pole.shoot()
+                self.table.pole.shoot()
 
             if event.type == pygame.MOUSEMOTION:
                 x, y = pygame.mouse.get_pos()
                 mousePos = np.array([x, y])
-                self.pole.setPos(mousePos)
-
+                self.table.pole.setPos(mousePos)
 
     def update(self):
         #update all blobs
-        self.balls.update()
-        self.pole.update()
+        self.table.update()
 
     def render(self, screen):
-        screen.fill((24, 119, 42))
+        screen.fill((0, 0, 0))
 
-        self.balls.render(screen)
-        self.pole.render(screen)
+        self.table.render(screen)
 
     def stop(self):
         self.isActive = False

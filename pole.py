@@ -58,6 +58,6 @@ class Pole:
 
 
     #renders the pole 
-    def render(self, screen):
+    def render(self, screen, x, y):
         if self.aiming and self.aimLen > self.MIN_AIM_LEN:
-            pygame.draw.line(screen, (200, 200, 200), (self.point1[0], self.point1[1]), (self.point2[0], self.point2[1]), self.POLE_WIDTH)
+            pygame.draw.line(screen, (200, 200, 200), (self.point1[0] + x, self.point1[1] + 2*y), (self.point2[0] + x, self.point2[1] + 2*y), self.POLE_WIDTH)

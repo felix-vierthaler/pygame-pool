@@ -2,8 +2,8 @@ import pygame
 
 #Class to handle the game loop and the scenes
 class App:
-    WIDTH = 1000
-    HEIGHT = 800
+    WIDTH = 1300
+    HEIGHT = 850
     FPS = 120
     TITLE = "Snake"
 
@@ -47,7 +47,6 @@ class App:
             self.activeScene.update()
             self.activeScene.render(self.screen)
             
-
             #flip pygame buffer to actually render to screen
             pygame.display.flip()
             #set framerate

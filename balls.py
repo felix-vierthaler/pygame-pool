@@ -15,6 +15,8 @@ class Balls:
         self.width = width
         self.height = height
 
+        self.start()
+
     class Ball:
         MASS = 1
         RESISTANCE = 0.0004
@@ -66,7 +68,6 @@ class Balls:
                 #render text on ball
                 text = self.font.render(self.design.name, True, self.FONT_COLOR)
                 self.surface.blit(text, (int(self.RADIUS - (text.get_width() / 2)), int(self.RADIUS - (text.get_height() / 2))))
-
 
         def update(self):
             #calculate new velocity with resistance
