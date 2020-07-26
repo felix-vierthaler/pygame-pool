@@ -4,11 +4,12 @@ import math
 import cmath
 import numpy as np
 
+from ballDesign import BallDesign, BallStatus
+
 class Balls:
     RADIUS = 25
-    TRIANGLE_SPACING = 5
+    TRIANGLE_SPACING = 0
     
-
     def __init__(self, width, height):
         self.balls = []
         self.width = width
@@ -19,20 +20,53 @@ class Balls:
         RESISTANCE = 0.0004
         MIN_VEL = 0.1
 
-        def __init__(self, x, y, xV, yV, id, radius):
-            self.RADIUS = radius
+        TEXT_SIZE = 10
+        TEXT_MARGIN = 6
+        STRIPE_MARGIN = 6
 
-            self.selected = False
+        FONT_COLOR = (1, 1, 1)
+
+        def __init__(self, x, y, xV, yV, id, radius):
+
+            self.design = BallDesign().getDesign(id)
+
+            self.RADIUS = radius
 
             self.pos = np.array([x, y])
             self.vel = np.array([xV, yV])
             self.id = id
 
-            self.color = (50, 100, 200)
-            if id == 0:
-                self.color = (245, 245, 245)
+            self.font = pygame.font.SysFont("comicsansms", self.TEXT_SIZE)
+            self.surface = 0
+            self.createSurface()
 
-            self.font = pygame.font.SysFont("comicsansms", 15)
+        #creates the surface of the ball before game starts. doesnt have to rerender on every frame
+        def createSurface(self):
+            #create new survace
+            self.surface = pygame.Surface((self.RADIUS*2, self.RADIUS*2))
+            self.surface.set_colorkey((0,0,0))  #dont blit black pixels
+            #render circle
+            pygame.draw.circle(self.surface, self.design.color, (self.RADIUS, self.RADIUS), self.RADIUS)
+
+            #if theres more to do than just the colors
+            if self.design.status == BallStatus.stripe or self.design.status == BallStatus.solid:
+                if self.design.status == BallStatus.stripe:
+                    #create new surface to construct striped ball because it is made up of weird shapes
+                    whiteSurface = pygame.Surface((self.RADIUS*2, self.RADIUS*2))
+                    whiteSurface.set_colorkey((0,0,0))  #dont blit black pixels
+                    pygame.draw.circle(whiteSurface, (255, 255, 255), (self.RADIUS, self.RADIUS), self.RADIUS)
+                    #calculate width of stripe on ball
+                    stripeWidth = self.TEXT_SIZE + (self.TEXT_MARGIN * 2) + (self.STRIPE_MARGIN * 2)
+                    pygame.draw.rect(whiteSurface, (0, 0, 0), pygame.Rect(0, self.RADIUS - stripeWidth // 2, self.RADIUS * 2, stripeWidth))
+                    self.surface.blit(whiteSurface, (0, 0))
+
+                #render white circle on ball
+                pygame.draw.circle(self.surface, (255, 255, 255), (self.RADIUS, self.RADIUS), int(self.TEXT_SIZE/2 + self.TEXT_MARGIN))
+
+                #render text on ball
+                text = self.font.render(self.design.name, True, self.FONT_COLOR)
+                self.surface.blit(text, (int(self.RADIUS - (text.get_width() / 2)), int(self.RADIUS - (text.get_height() / 2))))
+
 
         def update(self):
             #calculate new velocity with resistance
@@ -41,6 +75,7 @@ class Balls:
             #simplifyed formula for calculating new velocity with friction
             newVelLen = velLen - math.sqrt(self.RESISTANCE * velLen)
 
+            #if new velocity greater than min velocity, calc new velocity vector
             if newVelLen >= self.MIN_VEL:
                 self.vel = (newVelLen / velLen) * self.vel
             else:
@@ -50,15 +85,9 @@ class Balls:
             self.pos = self.pos + self.vel
 
         def render(self, screen):
-            #render circle
-            pygame.draw.circle(screen, self.color, (int(self.pos[0]), int(self.pos[1])), self.RADIUS)
-            if self.selected:
-                pygame.draw.circle(screen, (240,250,60), (int(self.pos[0]), int(self.pos[1])), self.RADIUS)
-
-            #render text on ball
-            text = self.font.render(str(self.id), True, (0, 0, 0))
-            screen.blit(text, (int(self.pos[0]) - text.get_width() / 2, int(self.pos[1]) - text.get_height() / 2))
+            screen.blit(self.surface, (int(self.pos[0] - self.RADIUS), int(self.pos[1] - self.RADIUS)))
         
+        #calculates physics of two colliding balls
         def collideWith(self, other):
             #information on: https://vobarian.com/collisions/2dcollisions2.pdf
 
@@ -132,12 +161,10 @@ class Balls:
                 self.pos += -moveVector
                 other.pos += moveVector
                 
-
     def start(self):
         self.balls.append(self.Ball(600, 600, 0, 0, 0, self.RADIUS))
         self.createTriangle(100,100)
         
-
     #creates the triangle of balls needed to start a game of 8 ball pool
     def createTriangle(self, xStart, yStart):
         distance = (self.RADIUS * 2) + self.TRIANGLE_SPACING
@@ -148,27 +175,21 @@ class Balls:
         for y in range(5):
             for x in range(y+1):
                 count += 1
-                
                 yPos = yStart + y * hDistance
                 xPos = (xStart + x * distance) + ((4 - y) * (distance / 2))
-
                 self.balls.append(self.Ball(xPos, yPos, 0, 0, count, self.RADIUS))
 
-
-    def mouseDown(self):
-        self.balls[0].selected = True
-
-    def mouseUp(self):
-        self.balls[0].selected = False
-
+    #returns the game Ball
     def getGameBall(self):
         return self.balls[0]
 
+    #sets new velocity of the game ball
     def shoot(self, aim):
         self.balls[0].vel = aim
 
+    #updates all balls in the array accordingly
     def update(self):
-        #check if out of bounds
+        #check if ball is out of bounds
         for ball in self.balls:
             if ball.pos[0] <= ball.RADIUS:
                 ball.vel[0] = ball.vel[0] * -1
@@ -184,16 +205,18 @@ class Balls:
                 ball.vel[1] = ball.vel[1] * -1
                 ball.pos[1] = self.height - ball.RADIUS
         
-        #check for collisions
+        #check for collisions between balls and handle inside Ball class
         for x in range(0, len(self.balls) - 1):
             for y in range(x + 1, len(self.balls)):
                 ball1 = self.balls[x]
                 ball2 = self.balls[y]
                 ball1.collideWith(ball2)
 
+        #update every ball
         for ball in self.balls:
             ball.update()
 
+    #renders all balls on screen
     def render(self, screen):
         for ball in self.balls:
             ball.render(screen)

@@ -27,7 +27,7 @@ class SceneBase:
     def stop(self):
         print('stop needs to be overwritten!')
 
-
+#this is the main scene where the game happens
 class GameScene(SceneBase):
     def __init__(self, app, width, height):
         SceneBase.__init__(self, app, width, height)
@@ -61,16 +61,14 @@ class GameScene(SceneBase):
                 self.pole.setPos(mousePos)
 
 
-
     def update(self):
         #update all blobs
         self.balls.update()
         self.pole.update()
 
     def render(self, screen):
-        screen.fill((0, 0, 0))
+        screen.fill((24, 119, 42))
 
-        #pygame.draw.rect(screen, (255, 100, 0), pygame.Rect(100, 100, 300, 300))
         self.balls.render(screen)
         self.pole.render(screen)
 
