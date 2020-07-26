@@ -7,6 +7,7 @@ import numpy as np
 class Balls:
     RADIUS = 25
     TRIANGLE_SPACING = 5
+    
 
     def __init__(self, width, height):
         self.balls = []
@@ -15,8 +16,8 @@ class Balls:
 
     class Ball:
         MASS = 1
-        RESISTANCE = 0.04
-        MIN_SPEED = 0.04
+        RESISTANCE = 0.0004
+        MIN_VEL = 0.1
 
         def __init__(self, x, y, xV, yV, id, radius):
             self.RADIUS = radius
@@ -36,12 +37,14 @@ class Balls:
         def update(self):
             #calculate new velocity with resistance
             velLen = np.linalg.norm(self.vel)
-            newVelLen = 0
-            if velLen > self.RESISTANCE:
-                newVelLen = velLen - self.RESISTANCE
+
+            #simplifyed formula for calculating new velocity with friction
+            newVelLen = velLen - math.sqrt(self.RESISTANCE * velLen)
+
+            if newVelLen >= self.MIN_VEL:
                 self.vel = (newVelLen / velLen) * self.vel
             else:
-                 self.vel = np.array([0, 0])
+                self.vel = np.array([0, 0])
 
             #update position
             self.pos = self.pos + self.vel
