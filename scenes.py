@@ -5,6 +5,7 @@ import numpy as np
 
 #own imports
 from balls import Balls
+from pole import Pole
 
 #base class for all scenes
 class SceneBase:
@@ -32,9 +33,11 @@ class GameScene(SceneBase):
         SceneBase.__init__(self, app, width, height)
 
         self.balls = Balls(self.width, self.height)
+        self.pole = Pole(self.width, self.height, self.balls)
         
         self.aimStart = 0
         self.aimEnd = 0
+        self.mousePos = 0
 
     def start(self):
         self.isActive = True
@@ -45,29 +48,31 @@ class GameScene(SceneBase):
         # proceed events
         for event in events:
             if event.type == pygame.MOUSEBUTTONDOWN:
-                self.balls.mouseDown()
                 x, y = pygame.mouse.get_pos()
-                self.aimStart = np.array([x, y])
+                aimStart = np.array([x, y])
+                self.pole.aim(aimStart)
                 
             if event.type == pygame.MOUSEBUTTONUP:
-                self.balls.mouseUp()
-                x, y = pygame.mouse.get_pos()
-                self.aimEnd = np.array([x, y])
+                self.pole.shoot()
 
-                aim = self.aimEnd - self.aimStart
-                self.balls.shoot(aim / 30)
+            if event.type == pygame.MOUSEMOTION:
+                x, y = pygame.mouse.get_pos()
+                mousePos = np.array([x, y])
+                self.pole.setPos(mousePos)
 
 
 
     def update(self):
         #update all blobs
         self.balls.update()
+        self.pole.update()
 
     def render(self, screen):
         screen.fill((0, 0, 0))
 
         #pygame.draw.rect(screen, (255, 100, 0), pygame.Rect(100, 100, 300, 300))
         self.balls.render(screen)
+        self.pole.render(screen)
 
     def stop(self):
         self.isActive = False

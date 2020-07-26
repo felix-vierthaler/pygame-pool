@@ -131,7 +131,7 @@ class Balls:
                 
 
     def start(self):
-        self.balls.append(self.Ball(600, 600, uniform(5, 10), uniform(5, 10), 0, self.RADIUS))
+        self.balls.append(self.Ball(600, 600, 0, 0, 0, self.RADIUS))
         self.createTriangle(100,100)
         
 
@@ -157,6 +157,9 @@ class Balls:
 
     def mouseUp(self):
         self.balls[0].selected = False
+
+    def getGameBall(self):
+        return self.balls[0]
 
     def shoot(self, aim):
         self.balls[0].vel = aim
