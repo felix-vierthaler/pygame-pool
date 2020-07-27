@@ -8,9 +8,7 @@ class Pole:
     MAX_AIM_LENGTH = 50
     POLE_WIDTH = 5
 
-    def __init__(self, width, height, balls):
-        self.width = width
-        self.height = height
+    def __init__(self, balls):
         self.balls = balls
 
         self.aiming = False
@@ -60,4 +58,4 @@ class Pole:
     #renders the pole 
     def render(self, screen, x, y):
         if self.aiming and self.aimLen > self.MIN_AIM_LEN:
-            pygame.draw.line(screen, (200, 200, 200), (self.point1[0] + x, self.point1[1] + 2*y), (self.point2[0] + x, self.point2[1] + 2*y), self.POLE_WIDTH)
+            pygame.draw.line(screen, (200, 200, 200), (self.point1[0] + x, self.point1[1] + y), (self.point2[0] + x, self.point2[1] + y), self.POLE_WIDTH)

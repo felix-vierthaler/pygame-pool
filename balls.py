@@ -190,6 +190,10 @@ class Balls:
 
     #updates all balls in the array accordingly
     def update(self):
+        #update every ball
+        for ball in self.balls:
+            ball.update()
+
         #check if ball is out of bounds
         for ball in self.balls:
             if ball.pos[0] <= ball.RADIUS:
@@ -212,10 +216,6 @@ class Balls:
                 ball1 = self.balls[x]
                 ball2 = self.balls[y]
                 ball1.collideWith(ball2)
-
-        #update every ball
-        for ball in self.balls:
-            ball.update()
 
     #renders all balls on screen
     def render(self, screen):

@@ -33,8 +33,8 @@ class GameScene(SceneBase):
     def __init__(self, app, width, height):
         SceneBase.__init__(self, app, width, height)
 
-        tableWidth = self.width - 40
-        self.table = Table(tableWidth, (self.width - tableWidth) // 2, 50)
+        self.tableWidth = self.width - 100
+        self.table = Table(self.tableWidth)
         
         self.aimStart = 0
         self.aimEnd = 0
@@ -66,7 +66,7 @@ class GameScene(SceneBase):
     def render(self, screen):
         screen.fill((0, 0, 0))
 
-        self.table.render(screen)
+        self.table.render(screen, (self.width - self.tableWidth) // 2, 50)
 
     def stop(self):
         self.isActive = False
