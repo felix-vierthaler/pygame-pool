@@ -9,11 +9,7 @@ class Table:
 
     def __init__(self, width):
         self.width = width
-
-        self.createTable()
         
-        
-
         self.tablePhysics = TablePhysics(self.width)
         self.height = self.tablePhysics.height
         self.balls = Balls(self.width, self.height)
@@ -22,12 +18,16 @@ class Table:
 
         self.preRender()
 
-    def createTable(self):
-        pass
-
     def update(self):
         self.balls.update()
         self.pole.update()
+
+        self.tablePhysics.intersectingLines = []
+        for ball in self.balls.getMaybeIntersectingBalls(self.tablePhysics.horSpacing, self.tablePhysics.verSpacing):
+            
+            isIntersecting, mirrorVector = self.tablePhysics.getMirrorVektor(ball.pos, ball.RADIUS)
+            if isIntersecting:
+                ball.mirror(mirrorVector)
 
     def preRender(self):
         self.surface = pygame.Surface((self.width, self.height))

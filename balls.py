@@ -7,7 +7,7 @@ import numpy as np
 from ballDesign import BallDesign, BallStatus
 
 class Balls:
-    RADIUS = 25
+    RADIUS = 15
     TRIANGLE_SPACING = 0
     
     def __init__(self, width, height):
@@ -22,7 +22,7 @@ class Balls:
         RESISTANCE = 0.0004
         MIN_VEL = 0.1
 
-        TEXT_SIZE = 10
+        
         TEXT_MARGIN = 6
         STRIPE_MARGIN = 6
 
@@ -33,6 +33,7 @@ class Balls:
             self.design = BallDesign().getDesign(id)
 
             self.RADIUS = radius
+            self.TEXT_SIZE = int(self.RADIUS / 2.5)
 
             self.pos = np.array([x, y])
             self.vel = np.array([xV, yV])
@@ -161,10 +162,13 @@ class Balls:
 
                 self.pos += -moveVector
                 other.pos += moveVector
+
+        def mirror(self, mirrorVector):  
+            self.vel = self.vel * -1
                 
     def start(self):
-        self.balls.append(self.Ball(600, 600, 0, 0, 0, self.RADIUS))
-        self.createTriangle(100,100)
+        self.balls.append(self.Ball(600, 500, 0, 0, 0, self.RADIUS))
+        self.createTriangle(600, 232)
         
     #creates the triangle of balls needed to start a game of 8 ball pool
     def createTriangle(self, xStart, yStart):
@@ -188,27 +192,31 @@ class Balls:
     def shoot(self, aim):
         self.balls[0].vel = aim
 
+    def getMaybeIntersectingBalls(self, verSpacing, horSpacing):
+        #check if ball is out of bounds
+        intersectingBalls = []
+        for ball in self.balls:
+            if np.linalg.norm(ball.vel) > 0:
+                intersecting = False
+                if ball.pos[0] <= ball.RADIUS + horSpacing:
+                    intersecting = True
+                elif ball.pos[0] > self.width - ball.RADIUS - horSpacing:
+                    intersecting = True
+                if ball.pos[1] <= ball.RADIUS + verSpacing:
+                    intersecting = True
+                elif ball.pos[1] > self.height - ball.RADIUS - verSpacing:
+                    intersecting = True
+
+                if intersecting:
+                    intersectingBalls.append(ball)
+
+        return intersectingBalls
+
     #updates all balls in the array accordingly
     def update(self):
         #update every ball
         for ball in self.balls:
             ball.update()
-
-        #check if ball is out of bounds
-        for ball in self.balls:
-            if ball.pos[0] <= ball.RADIUS:
-                ball.vel[0] = ball.vel[0] * -1
-                ball.pos[0] = ball.RADIUS
-            elif ball.pos[0] > self.width - ball.RADIUS:
-                ball.vel[0] = ball.vel[0] * -1
-                ball.pos[0] = self.width - ball.RADIUS
-
-            if ball.pos[1] <= ball.RADIUS:
-                ball.vel[1] = ball.vel[1] * -1
-                ball.pos[1] = ball.RADIUS
-            elif ball.pos[1] > self.height - ball.RADIUS:
-                ball.vel[1] = ball.vel[1] * -1
-                ball.pos[1] = self.height - ball.RADIUS
         
         #check for collisions between balls and handle inside Ball class
         for x in range(0, len(self.balls) - 1):

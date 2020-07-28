@@ -1,6 +1,8 @@
 import pygame
 import numpy as np
+from numpy.linalg import norm 
 import math
+import sys
 
 class TablePhysics:
     OUTER_WIDTH = 272
@@ -11,10 +13,13 @@ class TablePhysics:
     HOLE_WIDTH = 12
     HOLE_HEIGHT = 15
 
-
     def __init__(self, width):
         self.width = width
-        self.height = (self.width / self.OUTER_WIDTH) * self.OUTER_HEIGHT
+
+        scaleFactor = self.width / self.OUTER_WIDTH
+        self.height = scaleFactor * self.OUTER_HEIGHT
+        self.horSpacing = (self.OUTER_WIDTH - self.INNER_WIDTH) / 2 * scaleFactor
+        self.verSpacing = (self.OUTER_HEIGHT - self.INNER_HEIGHT) / 2 * scaleFactor
 
         #calculate dynamic dimensions from static dimensions
         self.HOR_SPACING = (self.OUTER_WIDTH - self.INNER_WIDTH) // 2
@@ -54,7 +59,10 @@ class TablePhysics:
             self.pointList.append(newPoint)
 
         #scale all the points to fit the given width
-        self.pointList = self.scalePointList(self.pointList, self.width / self.OUTER_WIDTH)
+        self.pointList = self.scalePointList(self.pointList, scaleFactor)
+
+
+        self.intersectingLines = []
 
     def scalePointList(self, pointList, scale):
         newPoints = []
@@ -63,8 +71,69 @@ class TablePhysics:
             newPoints.append(point)
         return newPoints
 
+    def calcDistPointToLine(self, p1, p2, p3):
+        return abs(np.cross(p2-p1,p3-p1)/np.linalg.norm(p2-p1))
+
+
+    def isCircleInLine(self, p1, p2, p3, radius):
+        intersecting = False
+
+        if self.calcDistPointToLine(p1, p2, p3) <= radius:
+            lineDir = p1-p2
+            diagonalVec = np.array([-lineDir[1], lineDir[0]])
+            
+            dp1 = p1 + diagonalVec
+            dp2 = p2 + diagonalVec
+            dLineDist = self.calcDistPointToLine(p1, dp1, p3) + self.calcDistPointToLine(p2, dp2, p3)
+
+            allowedLineLen = np.linalg.norm(p2-p1) + radius * 2
+
+            if dLineDist <= allowedLineLen:
+                intersecting = True
+
+        return intersecting
+
+    def getMirrorVektor(self, point, radius):
+        mirrorVektor = 0
+        isIntersecting = False
+        for i in range(0, len(self.pointList)):
+
+            #get both points of the line
+            p1 = self.pointList[i]
+            p2Index = i + 1
+            if p2Index >= len(self.pointList):
+                p2Index = 0
+            p2 = self.pointList[p2Index]
+
+
+            intersecting = self.isCircleInLine(p1, p2, point, radius)
+
+            #print("line: ", i, " dist: ", dist, " p1: ", p1, " p2: ", p2, " point: ", point, " cross: ", cross)
+            
+            if intersecting:
+                #print("line: ", i, " dist: ", dist, " p1: ", p1, " p2: ", p2, " point: ", point, " cross: ", cross)
+                #collision occured
+                mirrorVektor = p2 - p1
+                isIntersecting = True
+
+                self.intersectingLines.append((p1, p2))
+
+        return isIntersecting, mirrorVektor
+
     def update(self):
         pass
 
     def render(self, screen):
-        pygame.draw.polygon(screen, (255, 0, 0), self.pointList, 2)
+        pygame.draw.polygon(screen, (0, 255, 0), self.pointList, 2)
+
+        for line in self.intersectingLines:
+            pygame.draw.line(screen, (255, 0, 0), line[0], line[1], 2)
+
+
+
+
+#only if this file is executed as main
+if __name__ == "__main__":
+    tablePhysics = TablePhysics(1000)
+    
+    
