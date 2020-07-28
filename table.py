@@ -25,9 +25,9 @@ class Table:
         self.tablePhysics.intersectingLines = []
         for ball in self.balls.getMaybeIntersectingBalls(self.tablePhysics.horSpacing, self.tablePhysics.verSpacing):
             
-            isIntersecting, mirrorVector = self.tablePhysics.getMirrorVektor(ball.pos, ball.RADIUS)
-            if isIntersecting:
-                ball.mirror(mirrorVector)
+            mirrorVectors = self.tablePhysics.getMirrorVektor(ball.pos, ball.RADIUS)
+            for mirrorVector in mirrorVectors:
+                ball.mirror(mirrorVector[0], mirrorVector[1])
 
     def preRender(self):
         self.surface = pygame.Surface((self.width, self.height))

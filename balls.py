@@ -7,7 +7,7 @@ import numpy as np
 from ballDesign import BallDesign, BallStatus
 
 class Balls:
-    RADIUS = 15
+    RADIUS = 25
     TRIANGLE_SPACING = 0
     
     def __init__(self, width, height):
@@ -20,6 +20,7 @@ class Balls:
     class Ball:
         MASS = 1
         RESISTANCE = 0.0004
+        BORDER_RESISTANCE = 0.3
         MIN_VEL = 0.1
 
         
@@ -163,8 +164,24 @@ class Balls:
                 self.pos += -moveVector
                 other.pos += moveVector
 
-        def mirror(self, mirrorVector):  
-            self.vel = self.vel * -1
+        def mirror(self, mirrorVector, moveBy):  
+
+
+            un = mirrorVector / np.linalg.norm(mirrorVector)
+            ut = np.array([-un[1], un[0]])
+
+            unProj = np.dot(un, self.vel)
+            utProj = np.dot(ut, self.vel)
+
+            utProj = utProj * -1
+            utProj = utProj * ut
+            utProj = utProj - (utProj * self.BORDER_RESISTANCE)
+            unProj = unProj * un
+
+
+            self.vel = utProj + unProj
+            self.pos += ut * moveBy
+            print(moveBy)
                 
     def start(self):
         self.balls.append(self.Ball(600, 500, 0, 0, 0, self.RADIUS))

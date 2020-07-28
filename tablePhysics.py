@@ -10,8 +10,8 @@ class TablePhysics:
     INNER_WIDTH = 234
     INNER_HEIGHT = 117
 
-    HOLE_WIDTH = 12
-    HOLE_HEIGHT = 15
+    HOLE_WIDTH = 18  #12
+    HOLE_HEIGHT = 18  #15
 
     def __init__(self, width):
         self.width = width
@@ -78,24 +78,38 @@ class TablePhysics:
     def isCircleInLine(self, p1, p2, p3, radius):
         intersecting = False
 
-        if self.calcDistPointToLine(p1, p2, p3) <= radius:
+        intersectionLength = self.calcDistPointToLine(p1, p2, p3) - radius
+        
+
+        if intersectionLength <= 0:
+            
             lineDir = p1-p2
+
+            #calculate vector diagonal to the line
             diagonalVec = np.array([-lineDir[1], lineDir[0]])
             
+            #create points diagonal to line from line points
             dp1 = p1 + diagonalVec
             dp2 = p2 + diagonalVec
-            dLineDist = self.calcDistPointToLine(p1, dp1, p3) + self.calcDistPointToLine(p2, dp2, p3)
+            #calc parallel distances from input point to new lines
+            dLineDist1 = self.calcDistPointToLine(p1, dp1, p3)
+            dLineDist2 = self.calcDistPointToLine(p2, dp2, p3)
+            #calc distances from input point to line points
+            lineDist1 = np.linalg.norm(p1 - p3)
+            lineDist2 = np.linalg.norm(p2 - p3)
 
-            allowedLineLen = np.linalg.norm(p2-p1) + radius * 2
+            #check if ball is on line
+            if dLineDist1 + dLineDist2 <= np.linalg.norm(p2-p1) + 1:
+                intersecting = True
+            
 
-            if dLineDist <= allowedLineLen:
+            elif lineDist1 <= radius or lineDist2 <= radius:
                 intersecting = True
 
-        return intersecting
+        return intersecting, intersectionLength * -1
 
     def getMirrorVektor(self, point, radius):
-        mirrorVektor = 0
-        isIntersecting = False
+        mirrorVektors = []
         for i in range(0, len(self.pointList)):
 
             #get both points of the line
@@ -105,26 +119,24 @@ class TablePhysics:
                 p2Index = 0
             p2 = self.pointList[p2Index]
 
-
-            intersecting = self.isCircleInLine(p1, p2, point, radius)
-
-            #print("line: ", i, " dist: ", dist, " p1: ", p1, " p2: ", p2, " point: ", point, " cross: ", cross)
+            intersecting, howMuch = self.isCircleInLine(p1, p2, point, radius)
             
             if intersecting:
                 #print("line: ", i, " dist: ", dist, " p1: ", p1, " p2: ", p2, " point: ", point, " cross: ", cross)
+
                 #collision occured
-                mirrorVektor = p2 - p1
-                isIntersecting = True
-
+                connVector = p2 - p1
+                mirrorVektors.append((connVector, howMuch))
                 self.intersectingLines.append((p1, p2))
+                break
 
-        return isIntersecting, mirrorVektor
+        return mirrorVektors
 
     def update(self):
         pass
 
     def render(self, screen):
-        pygame.draw.polygon(screen, (0, 255, 0), self.pointList, 2)
+        pygame.draw.polygon(screen, (0, 0, 0), self.pointList, 2)
 
         for line in self.intersectingLines:
             pygame.draw.line(screen, (255, 0, 0), line[0], line[1], 2)
