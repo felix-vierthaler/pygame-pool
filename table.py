@@ -16,6 +16,12 @@ class Table:
 
         self.pole = Pole(self.balls)
 
+        #add assets
+        self.tableImg = pygame.image.load('assets/table2.jpg')
+        self.tableImg = self.tableImg.convert()
+        self.tableImg = pygame.transform.scale(self.tableImg, (self.width, int(self.height)))
+        
+
         self.preRender()
 
     def update(self):
@@ -31,7 +37,8 @@ class Table:
 
     def preRender(self):
         self.surface = pygame.Surface((self.width, self.height))
-        pygame.draw.rect(self.surface, (55, 236, 85), pygame.Rect(0, 0, self.width, self.height))
+        self.surface.blit(self.tableImg, (0, 0))
+        #pygame.draw.rect(self.surface, (55, 236, 85), pygame.Rect(0, 0, self.width, self.height))
 
     def render(self, screen, x, y):
 
@@ -40,7 +47,7 @@ class Table:
 
         self.balls.render(tableSurf)
 
-        self.tablePhysics.render(tableSurf)
+        #self.tablePhysics.render(tableSurf)
 
         screen.blit(tableSurf, (x, y))
 

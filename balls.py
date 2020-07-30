@@ -19,7 +19,7 @@ class Balls:
 
     class Ball:
         MASS = 1
-        RESISTANCE = 0.0004
+        RESISTANCE = 0.0002
         BORDER_RESISTANCE = 0.3
         MIN_VEL = 0.1
 

@@ -64,7 +64,7 @@ class GameScene(SceneBase):
         self.table.update()
 
     def render(self, screen):
-        screen.fill((0, 0, 0))
+        screen.fill((255, 255, 255))
 
         self.table.render(screen, (self.width - self.tableWidth) // 2, 50)
 

@@ -4,7 +4,7 @@ import pygame
 class App:
     WIDTH = 1300
     HEIGHT = 850
-    FPS = 80
+    FPS = 120
     TITLE = "Snake"
 
     def __init__(self, startScene):

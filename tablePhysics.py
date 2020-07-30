@@ -156,10 +156,10 @@ class TablePhysics:
         pass
 
     def render(self, screen):
-        pygame.draw.polygon(screen, (0, 0, 0), self.pointList, 2)
+        pygame.draw.polygon(screen, (0, 0, 0), self.pointList, 1)
 
         for line in self.intersectingLines:
-            pygame.draw.line(screen, (255, 0, 0), line[0], line[1], 2)
+            pygame.draw.line(screen, (255, 0, 0), line[0], line[1], 1)
 
 
 
