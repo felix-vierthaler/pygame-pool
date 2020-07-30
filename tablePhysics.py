@@ -10,8 +10,9 @@ class TablePhysics:
     INNER_WIDTH = 234
     INNER_HEIGHT = 117
 
-    HOLE_WIDTH = 18  #12
-    HOLE_HEIGHT = 18  #15
+    HOLE_WIDTH = 15  #12
+    HOLE_HEIGHT = 15  #15
+    CHAMFER = 4
 
     def __init__(self, width):
         self.width = width
@@ -39,8 +40,11 @@ class TablePhysics:
         p2 = np.array([p1[0] - self.HOLE_HEIGHT_T, p1[1] - self.HOLE_HEIGHT_T])  #P2
         p3 = np.array([p2[0] + self.HOLE_WIDTH_T, p2[1] - self.HOLE_WIDTH_T])  #P3
         p4 = np.array([startPoint[0] + self.HOLE_WIDTH_T, startPoint[1]])  #P4
-        p5 = np.array([startPoint[0] + self.INNER_WIDTH / 2 - self.HOLE_WIDTH / 2, startPoint[1]])  #P5
-        p6 = np.array([p5[0], p5[1] - self.HOLE_HEIGHT])  #P5
+
+        p5 = np.array([startPoint[0] + self.INNER_WIDTH / 2 - self.HOLE_WIDTH / 2 - self.CHAMFER, startPoint[1]])  #P5
+        p6 = np.array([startPoint[0] + self.INNER_WIDTH / 2 - self.HOLE_WIDTH / 2, startPoint[1] - self.CHAMFER])  #P6
+
+        p7 = np.array([p6[0], p6[1] - self.HOLE_HEIGHT + self.CHAMFER])  #P5
 
         self.pointList.append(p1)
         self.pointList.append(p2)
@@ -48,6 +52,7 @@ class TablePhysics:
         self.pointList.append(p4)
         self.pointList.append(p5)
         self.pointList.append(p6)
+        self.pointList.append(p7)
 
         #mirror existing points on y axis and add to array in reverse order
         for point in reversed(self.pointList):

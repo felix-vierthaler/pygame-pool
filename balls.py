@@ -181,7 +181,6 @@ class Balls:
 
             self.vel = utProj + unProj
             self.pos += ut * moveBy
-            print(moveBy)
                 
     def start(self):
         self.balls.append(self.Ball(600, 500, 0, 0, 0, self.RADIUS))
