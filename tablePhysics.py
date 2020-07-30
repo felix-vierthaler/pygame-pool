@@ -77,11 +77,14 @@ class TablePhysics:
 
     def isCircleInLine(self, p1, p2, p3, radius):
         intersecting = False
+        mirrorVektor = 0
+        intersectionLength = 0
 
-        intersectionLength = self.calcDistPointToLine(p1, p2, p3) - radius
+
+        pointToLineDiagDist = self.calcDistPointToLine(p1, p2, p3) - radius
         
 
-        if intersectionLength <= 0:
+        if pointToLineDiagDist <= 0:
             
             lineDir = p1-p2
 
@@ -98,15 +101,28 @@ class TablePhysics:
             lineDist1 = np.linalg.norm(p1 - p3)
             lineDist2 = np.linalg.norm(p2 - p3)
 
-            #check if ball is on line
+            #check if ball is on main part of line
+            
             if dLineDist1 + dLineDist2 <= np.linalg.norm(p2-p1) + 1:
                 intersecting = True
+                mirrorVektor = p2 - p1
+                intersectionLength = abs(pointToLineDiagDist)
             
 
-            elif lineDist1 <= radius or lineDist2 <= radius:
+            elif lineDist1 <= radius:
                 intersecting = True
+                mirrorVektor = p1 - p3
+                mirrorVektor = np.array([-mirrorVektor[1], mirrorVektor[0]])
+                intersectionLength = abs(np.linalg.norm(p1 - p3) - radius)
 
-        return intersecting, intersectionLength * -1
+            
+            elif lineDist2 <= radius:
+                intersecting = True
+                mirrorVektor = p2 - p3
+                mirrorVektor = np.array([-mirrorVektor[1], mirrorVektor[0]])
+                intersectionLength = abs(np.linalg.norm(p2 - p3) - radius)
+
+        return intersecting, intersectionLength, mirrorVektor
 
     def getMirrorVektor(self, point, radius):
         mirrorVektors = []
@@ -119,14 +135,13 @@ class TablePhysics:
                 p2Index = 0
             p2 = self.pointList[p2Index]
 
-            intersecting, howMuch = self.isCircleInLine(p1, p2, point, radius)
+            intersecting, howMuch, mirrorVektor = self.isCircleInLine(p1, p2, point, radius)
             
             if intersecting:
                 #print("line: ", i, " dist: ", dist, " p1: ", p1, " p2: ", p2, " point: ", point, " cross: ", cross)
 
                 #collision occured
-                connVector = p2 - p1
-                mirrorVektors.append((connVector, howMuch))
+                mirrorVektors.append((mirrorVektor, howMuch))
                 self.intersectingLines.append((p1, p2))
                 break
 
