@@ -31,7 +31,11 @@ class Table:
         self.tablePhysics.intersectingLines = []
         for ball in self.balls.getMaybeIntersectingBalls(self.tablePhysics.horSpacing, self.tablePhysics.verSpacing):
             
-            mirrorVectors = self.tablePhysics.getMirrorVektor(ball.pos, ball.RADIUS)
+            mirrorVectors, inHole = self.tablePhysics.getMirrorVektor(ball.pos, ball.RADIUS)
+
+            if inHole:
+                self.balls.removeBall(ball)
+
             for mirrorVector in mirrorVectors:
                 ball.mirror(mirrorVector[0], mirrorVector[1])
 

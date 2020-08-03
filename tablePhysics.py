@@ -14,6 +14,8 @@ class TablePhysics:
     HOLE_HEIGHT = 15  #15
     CHAMFER = 4
 
+    holeLineIndexes = [1, 6, 11, 15, 20, 25]
+
     def __init__(self, width):
         self.width = width
 
@@ -131,6 +133,7 @@ class TablePhysics:
 
     def getMirrorVektor(self, point, radius):
         mirrorVektors = []
+        inHole = False
         for i in range(0, len(self.pointList)):
 
             #get both points of the line
@@ -145,12 +148,17 @@ class TablePhysics:
             if intersecting:
                 #print("line: ", i, " dist: ", dist, " p1: ", p1, " p2: ", p2, " point: ", point, " cross: ", cross)
 
+                for lineIndex in self.holeLineIndexes:
+                    if lineIndex == i:
+                        inHole = True
+                        break
+
                 #collision occured
                 mirrorVektors.append((mirrorVektor, howMuch))
                 self.intersectingLines.append((p1, p2))
                 break
 
-        return mirrorVektors
+        return mirrorVektors, inHole
 
     def update(self):
         pass
@@ -160,8 +168,6 @@ class TablePhysics:
 
         for line in self.intersectingLines:
             pygame.draw.line(screen, (255, 0, 0), line[0], line[1], 1)
-
-
 
 
 #only if this file is executed as main

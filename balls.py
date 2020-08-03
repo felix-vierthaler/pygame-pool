@@ -185,6 +185,9 @@ class Balls:
     def start(self):
         self.balls.append(self.Ball(600, 500, 0, 0, 0, self.RADIUS))
         self.createTriangle(600, 232)
+
+    def removeBall(self, ball):
+        self.balls.remove(ball)
         
     #creates the triangle of balls needed to start a game of 8 ball pool
     def createTriangle(self, xStart, yStart):
