@@ -36,9 +36,6 @@ class GameScene(SceneBase):
         self.tableWidth = self.width - 100
         self.table = Table(self.tableWidth)
         
-        self.aimStart = 0
-        self.aimEnd = 0
-        self.mousePos = 0
 
     def start(self):
         self.isActive = True

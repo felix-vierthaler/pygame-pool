@@ -82,15 +82,14 @@ class TablePhysics:
         return abs(np.cross(p2-p1,p3-p1)/np.linalg.norm(p2-p1))
 
 
+    #checks if a circle is in a line. Also returns how much and what the mirrorVektor is
     def isCircleInLine(self, p1, p2, p3, radius):
         intersecting = False
         mirrorVektor = 0
         intersectionLength = 0
 
-
         pointToLineDiagDist = self.calcDistPointToLine(p1, p2, p3) - radius
         
-
         if pointToLineDiagDist <= 0:
             
             lineDir = p1-p2
@@ -109,20 +108,18 @@ class TablePhysics:
             lineDist2 = np.linalg.norm(p2 - p3)
 
             #check if ball is on main part of line
-            
             if dLineDist1 + dLineDist2 <= np.linalg.norm(p2-p1) + 1:
                 intersecting = True
                 mirrorVektor = p2 - p1
                 intersectionLength = abs(pointToLineDiagDist)
             
-
+            #Check if ball is on the ouside parts of the line. Collision is different
             elif lineDist1 <= radius:
                 intersecting = True
                 mirrorVektor = p1 - p3
                 mirrorVektor = np.array([-mirrorVektor[1], mirrorVektor[0]])
                 intersectionLength = abs(np.linalg.norm(p1 - p3) - radius)
 
-            
             elif lineDist2 <= radius:
                 intersecting = True
                 mirrorVektor = p2 - p3
@@ -131,6 +128,7 @@ class TablePhysics:
 
         return intersecting, intersectionLength, mirrorVektor
 
+    #Checks if a ball is intersecting with any lines of the table. If it does, return all the mirrorVektors
     def getMirrorVektor(self, point, radius):
         mirrorVektors = []
         inHole = False
@@ -148,6 +146,7 @@ class TablePhysics:
             if intersecting:
                 #print("line: ", i, " dist: ", dist, " p1: ", p1, " p2: ", p2, " point: ", point, " cross: ", cross)
 
+                #check if the intersecting Line is a Line behind a hole
                 for lineIndex in self.holeLineIndexes:
                     if lineIndex == i:
                         inHole = True
@@ -162,7 +161,8 @@ class TablePhysics:
 
     def update(self):
         pass
-
+    
+    #render the physics model of the table. (Only for debugging)
     def render(self, screen):
         pygame.draw.polygon(screen, (0, 0, 0), self.pointList, 1)
 
